@@ -236,7 +236,7 @@
 
   })();
 
-  navigator.getUserMedia || (navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+  //navigator.getUserMedia || (navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
 
   window.AudioContext || (window.AudioContext = window.webkitAudioContext);
 
@@ -248,7 +248,7 @@
     }
   };
 
-  if (navigator.getUserMedia) {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     check_canvas_to_blob();
     vorbis_audio = "audio/ogg; codecs=vorbis";
     mpeg_audio = "audio/mpeg; ";
@@ -320,11 +320,11 @@
         that = this;
         success = function(stream) {
           that._remove_message();
-          if (window.URL) {
-            that.video.src = URL.createObjectURL(stream);
-          } else {
-            that.video.src = stream;
-          }
+          // if (window.URL) {
+          //   that.video.src = URL.createObjectURL(stream);
+          // } else {
+            that.video.srcObject = stream;
+          // }
           that._block_element_access();
           return that._wait_for_video_ready();
         };
@@ -343,10 +343,11 @@
           return that._got_error("UNKNOWN ERROR");
         };
         try {
-          return navigator.getUserMedia(get_user_media_options, success, failure);
+          return navigator.mediaDevices.getUserMedia(get_user_media_options).then(success).catch(failure);
         } catch (_error) {
           error = _error;
-          return navigator.getUserMedia("video", success, failure);
+          return navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(success).catch(failure);
+          //return navigator.getUserMedia("video", success, failure);
         }
       };
 
